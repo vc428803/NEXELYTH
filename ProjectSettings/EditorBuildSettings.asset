@@ -6,8 +6,17 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: Assets/NEXELYTH/Scenes/NexelythBootstrap.unity
+    guid: 373eadb2f31e2d84bbd2a6b3c5f5fa70
+  - enabled: 1
+    path: Assets/NEXELYTH/Scenes/Aurevane.unity
+    guid: 32edd3a7442560f4b9e2a6919777445e
+  - enabled: 1
+    path: Assets/NEXELYTH/Scenes/SylvarisFields.unity
+    guid: 02527d41a71314243b6b316a92300744
+  - enabled: 1
+    path: Assets/NEXELYTH/Scenes/ObsidianHollow.unity
+    guid: 9d861b29307414047b5ece2c46b2fa9f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: c495a5b6482e6664195fede54af3d120, type: 2}
