@@ -1,3 +1,4 @@
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class NexelythPortal : MonoBehaviour
@@ -15,16 +16,6 @@ public class NexelythPortal : MonoBehaviour
         if (characterController == null)
             return;
 
-        // 修改原因：所有世界傳送統一交由 Bootstrap 內的
-        // NexelythWorldSceneManager 管理，Portal 本身只保存目的地資料。
-        if (NexelythWorldSceneManager.Instance == null)
-        {
-            Debug.LogError(
-                "[NEXELYTH Portal] World Scene Manager not found."
-            );
-
-            return;
-        }
 
         // 修改原因：避免 Portal 尚未指定 World Location Asset 時執行傳送。
         if (targetLocation == null)
@@ -36,11 +27,27 @@ public class NexelythPortal : MonoBehaviour
             return;
         }
 
-        // 修改原因：Portal 改為引用可共用的 World Location ScriptableObject，
-        // 讓多個 Portal、Quest 或傳送功能可以共用同一個目的地設定。
-        NexelythWorldSceneManager.Instance.ChangeWorldScene(
-            targetLocation.MapId,
-            targetLocation.Coordinate
+        // 修改原因：Portal 改為只依賴統一的世界傳送服務入口，
+        // 不再直接依賴 NexelythWorldSceneManager 具體類別。
+        //Portal 概念會變成
+        //→ NexelythWorldTravel.Service
+        //→ IWorldTravelService
+        //→ NexelythWorldSceneManager
+        //這一步做完之後，Portal 本身就完全不知道 NexelythWorldSceneManager 是誰了。
+        IWorldTravelService worldTravelService =
+            NexelythWorldTravel.Service;
+
+        if (worldTravelService == null)
+        {
+            Debug.LogError(
+                "[NEXELYTH Portal] World travel service is not available."
+            );
+
+            return;
+        }
+
+        worldTravelService.TravelTo(
+            targetLocation
         );
     }
 }

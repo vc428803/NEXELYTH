@@ -2,8 +2,16 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.XR.CoreUtils;
+//現在架構就變成：
 
-public class NexelythWorldSceneManager : MonoBehaviour
+//NexelythWorldSceneManager
+//        ↓ 啟動時 Register
+//NexelythWorldTravel
+//        ↓
+//IWorldTravelService
+public class NexelythWorldSceneManager :
+    MonoBehaviour,
+    IWorldTravelService
 {
     public static NexelythWorldSceneManager Instance { get; private set; }
 
@@ -23,8 +31,13 @@ public class NexelythWorldSceneManager : MonoBehaviour
         }
 
         Instance = this;
-    }
 
+        // 修改原因：將目前的 World Scene Manager 註冊成世界傳送服務，
+        // 讓 Portal 未來只依賴 IWorldTravelService，而不依賴具體 Manager。
+        NexelythWorldTravel.Register(
+            this
+        );
+    }
     private void Start()
     {
         // 修改原因：BootstrapLoader 會先載入初始 World Scene，
@@ -32,6 +45,22 @@ public class NexelythWorldSceneManager : MonoBehaviour
         StartCoroutine(
             InitializeCurrentWorldSceneRoutine()
         );
+    }
+
+    private void OnDestroy()
+    {
+        // 修改原因：Manager 被銷毀時解除世界傳送服務註冊，
+        // 避免全域入口保留已失效的服務引用。
+        NexelythWorldTravel.Unregister(
+            this
+        );
+
+        // 修改原因：只有目前這個 Singleton 本身被銷毀時才清除 Instance，
+        // 避免重複物件誤清除有效的 Manager。
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 
     private IEnumerator InitializeCurrentWorldSceneRoutine()
@@ -60,6 +89,30 @@ public class NexelythWorldSceneManager : MonoBehaviour
         );
     }
 
+    //中階寫法（透過介面）：IWorldTravelService worldTravelService = NexelythWorldSceneManager.Instance;
+    //worldTravelService.TravelTo(targetLocation);
+    public void TravelTo(
+        NexelythWorldLocationSO targetLocation
+    )
+    {
+        // 修改原因：提供統一的世界傳送介面，
+        // 讓 Portal 與其他系統不需要直接依賴 Scene Manager 的具體傳送參數。
+        if (targetLocation == null)
+        {
+            Debug.LogError(
+                "[NEXELYTH World Scene Manager] Target location is null."
+            );
+
+            return;
+        }
+
+        ChangeWorldScene(
+            targetLocation.MapId,
+            targetLocation.Coordinate
+        );
+    }
+
+    //初階寫法（直接呼叫） NexelythWorldSceneManager.Instance.ChangeWorldScene
     public void ChangeWorldScene(
         string targetSceneName,
         Vector2Int targetCoordinate
