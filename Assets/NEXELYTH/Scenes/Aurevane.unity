@@ -629,9 +629,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4452a24012f265d4c9deed9cf9405f65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NexelythPortal
-  targetSceneName: SylvarisFields
-  targetX: 10
-  targetY: 8
+  targetLocation: {fileID: 11400000, guid: e9bc90ac5ee39ac408e29510333a9211, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

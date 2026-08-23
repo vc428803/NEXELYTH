@@ -454,9 +454,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4452a24012f265d4c9deed9cf9405f65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NexelythPortal
-  targetSceneName: Aurevane
-  targetX: 40
-  targetY: 25
+  targetLocation: {fileID: 11400000, guid: bdd82cf438b46174581012f3a6438ca0, type: 2}
 --- !u!1 &1751487956
 GameObject:
   m_ObjectHideFlags: 0

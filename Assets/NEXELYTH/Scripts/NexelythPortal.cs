@@ -3,13 +3,7 @@ using UnityEngine;
 public class NexelythPortal : MonoBehaviour
 {
     [SerializeField]
-    private string targetSceneName;
-
-    [SerializeField]
-    private int targetX;
-
-    [SerializeField]
-    private int targetY;
+    private NexelythWorldLocationSO targetLocation;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -32,17 +26,21 @@ public class NexelythPortal : MonoBehaviour
             return;
         }
 
-        // 修改原因：Portal 不再只指定 Scene，
-        // 同時保存目標地圖座標，作為未來 Memo、傳送技能與 Fast Travel 的共同格式。
-        Vector2Int targetCoordinate =
-            new Vector2Int(
-                targetX,
-                targetY
+        // 修改原因：避免 Portal 尚未指定 World Location Asset 時執行傳送。
+        if (targetLocation == null)
+        {
+            Debug.LogError(
+                "[NEXELYTH Portal] Target location is not configured."
             );
 
+            return;
+        }
+
+        // 修改原因：Portal 改為引用可共用的 World Location ScriptableObject，
+        // 讓多個 Portal、Quest 或傳送功能可以共用同一個目的地設定。
         NexelythWorldSceneManager.Instance.ChangeWorldScene(
-            targetSceneName,
-            targetCoordinate
+            targetLocation.MapId,
+            targetLocation.Coordinate
         );
     }
 }
