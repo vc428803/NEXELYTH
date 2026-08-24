@@ -63,6 +63,7 @@ public class NexelythWorldSceneManager :
         }
     }
 
+
     private IEnumerator InitializeCurrentWorldSceneRoutine()
     {
         // 修改原因：等待 BootstrapLoader 完成初始 World Scene 的 Additive 載入。
@@ -84,9 +85,45 @@ public class NexelythWorldSceneManager :
                 );
         }
 
-        EnsureMapCoordinateSystem(
-            currentScene
-        );
+        // 修改原因：取得初始 World Scene 的座標系，
+        // 讓玩家尚未經過任何 Portal 前也能建立目前位置資料。
+        NexelythMapCoordinateSystem coordinateSystem =
+            EnsureMapCoordinateSystem(
+                currentScene
+            );
+
+        // 修改原因：取得 Bootstrap 中持續存在的 XR Origin，
+        // 用目前玩家的 Unity 世界位置換算初始 Map X/Y。
+        XROrigin xrOrigin =
+            Object.FindFirstObjectByType<XROrigin>();
+
+        if (xrOrigin != null &&
+            coordinateSystem != null &&
+            NexelythPlayerLocationService.Instance != null)
+        {
+            Vector2Int currentCoordinate =
+                coordinateSystem.WorldToMapCoordinate(
+                    xrOrigin.transform.position
+                );
+
+            // 修改原因：遊戲一開始就記錄玩家目前所在的 Map + X/Y，
+            // 避免 Memo、存檔或復活系統在第一次傳送前讀不到位置。
+            NexelythPlayerLocationService.Instance.SetCurrentLocation(
+                new NexelythWorldLocation(
+                    currentScene.name,
+                    currentCoordinate.x,
+                    currentCoordinate.y
+                )
+            );
+
+            // 修改原因：暫時輸出初始位置，
+            // 驗證 Player Location Service 在第一次 Portal 傳送前已經有資料。
+            Debug.Log(
+                $"[NEXELYTH Player Location Service] " +
+                $"Initial Map={currentScene.name}, " +
+                $"Coordinate=({currentCoordinate.x}, {currentCoordinate.y})"
+            );
+        }
     }
 
     //中階寫法（透過介面）：IWorldTravelService worldTravelService = NexelythWorldSceneManager.Instance;
