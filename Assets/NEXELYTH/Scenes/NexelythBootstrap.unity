@@ -293,6 +293,7 @@ GameObject:
   - component: {fileID: 1355796659}
   - component: {fileID: 1355796658}
   - component: {fileID: 1355796660}
+  - component: {fileID: 1355796661}
   m_Layer: 0
   m_Name: Bootstrap
   m_TagString: Untagged
@@ -341,6 +342,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NexelythWorldSceneManager
   currentWorldSceneName: Aurevane
+--- !u!114 &1355796661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1355796657}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a895c3888fd8a541ad6a439906b91e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NexelythPlayerLocationService
 --- !u!1 &1844929996 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1767192433, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}

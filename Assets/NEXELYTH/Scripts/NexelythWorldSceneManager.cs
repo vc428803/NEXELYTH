@@ -231,6 +231,33 @@ public class NexelythWorldSceneManager :
         currentWorldSceneName =
             targetSceneName;
 
+        // 修改原因：傳送完成後同步更新玩家目前所在的 Map + X/Y，
+        // 讓 Memo、復活點、Fast Travel 與存檔系統可以共用同一份位置資料。
+        if (NexelythPlayerLocationService.Instance != null)
+        {
+            NexelythPlayerLocationService.Instance.SetCurrentLocation(
+                new NexelythWorldLocation(
+                    targetSceneName,
+                    targetCoordinate.x,
+                    targetCoordinate.y
+                )
+            );
+
+            // 修改原因：暫時輸出玩家位置服務目前保存的 Map + X/Y，
+            // 用來驗證跨 Scene 傳送後 CurrentLocation 是否同步更新成功。
+            NexelythWorldLocation currentLocation =
+                NexelythPlayerLocationService.Instance.CurrentLocation;
+
+            if (currentLocation != null)
+            {
+                Debug.Log(
+                    $"[NEXELYTH Player Location Service] " +
+                    $"Map={currentLocation.MapId}, " +
+                    $"Coordinate=({currentLocation.X}, {currentLocation.Y})"
+                );
+            }
+        }
+
         // 修改原因：確認新世界完成載入、座標系建立、
         // 且玩家已移動到目標位置後，再卸載舊世界。
         if (!string.IsNullOrWhiteSpace(
