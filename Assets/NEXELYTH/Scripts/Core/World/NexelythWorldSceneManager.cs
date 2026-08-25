@@ -2,13 +2,13 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.XR.CoreUtils;
-//現在架構就變成：
+//固定地點 Asset
+//NexelythWorldLocationSO
+//→ Portal / Fast Travel
 
-//NexelythWorldSceneManager
-//        ↓ 啟動時 Register
-//NexelythWorldTravel
-//        ↓
-//IWorldTravelService
+//Runtime 地點
+//NexelythWorldLocation
+//→ Memo / Save / Respawn
 public class NexelythWorldSceneManager :
     MonoBehaviour,
     IWorldTravelService
@@ -138,6 +138,27 @@ public class NexelythWorldSceneManager :
         {
             Debug.LogError(
                 "[NEXELYTH World Scene Manager] Target location is null."
+            );
+
+            return;
+        }
+
+        ChangeWorldScene(
+            targetLocation.MapId,
+            targetLocation.Coordinate
+        );
+    }
+
+    public void TravelTo(
+    NexelythWorldLocation targetLocation
+)
+    {
+        // 修改原因：支援 Runtime 產生的世界位置資料，
+        // 讓 Memo、復活點與存檔位置可以直接共用同一套世界傳送流程。
+        if (targetLocation == null)
+        {
+            Debug.LogError(
+                "[NEXELYTH World Scene Manager] Runtime target location is null."
             );
 
             return;

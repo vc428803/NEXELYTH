@@ -65,6 +65,46 @@ public class NexelythMemoLocationService : MonoBehaviour
         );
     }
 
+    public void TravelToMemoLocation()
+    {
+        // 修改原因：只有已經成功保存 Memo 位置時才能執行傳送，
+        // 避免尚未存點就呼叫傳送造成無效目的地。
+        if (memoLocation == null)
+        {
+            Debug.LogError(
+                "[NEXELYTH Memo] Memo location has not been saved yet."
+            );
+
+            return;
+        }
+
+        // 修改原因：Memo 改走統一的 IWorldTravelService，
+        // 不直接依賴 NexelythWorldSceneManager，維持與 Portal 相同的傳送架構。
+        IWorldTravelService worldTravelService =
+            NexelythWorldTravel.Service;
+
+        if (worldTravelService == null)
+        {
+            Debug.LogError(
+                "[NEXELYTH Memo] World travel service is not available."
+            );
+
+            return;
+        }
+
+        worldTravelService.TravelTo(
+            memoLocation
+        );
+    }
+
+    [ContextMenu("Test Travel To Memo Location")]
+    private void TestTravelToMemoLocation()
+    {
+        // 修改原因：提供尚未製作正式 Memo UI 前的測試入口，
+        // 驗證已保存的 Runtime Location 能否透過統一傳送服務返回。
+        TravelToMemoLocation();
+    }
+
     [ContextMenu("Test Save Current Location")]
     private void TestSaveCurrentLocation()
     {
