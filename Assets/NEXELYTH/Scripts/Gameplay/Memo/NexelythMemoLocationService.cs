@@ -60,6 +60,14 @@ public class NexelythMemoLocationService : MonoBehaviour
     // Unity Lifecycle
     // =========================================================
 
+
+    //啟動 NEXELYTH
+    //↓
+    //Memo Service Awake
+    //↓
+    //自動讀 memo_save.json
+    //↓
+    //Slot 0 / 1 / 2 自動恢復
     private void Awake()
     {
         // 確保 Bootstrap 中只有一個 Memo Location Service，
@@ -77,6 +85,12 @@ public class NexelythMemoLocationService : MonoBehaviour
         // 的 constructor / 欄位初始化階段呼叫，因此改在 Awake 建立 Save Service。
         memoSaveService =
             new NexelythMemoSaveService();
+
+        //  Memo Service 啟動後自動嘗試讀取上次的 Memo 存檔，
+        // 讓玩家重新進入遊戲時可以直接恢復之前保存的 Memo Slots。
+        memoSaveService.Load(
+            this
+        );
     }
 
     private void OnDestroy()
@@ -107,16 +121,8 @@ public class NexelythMemoLocationService : MonoBehaviour
         return memoSlots[slotIndex];
     }
 
-    public void SaveCurrentLocation(
-        int slotIndex
-    )
+    public void SaveCurrentLocation()
     {
-        // 修改原因：避免存取不存在的 Memo Slot。
-        if (!IsValidSlotIndex(slotIndex))
-        {
-            return;
-        }
-
         if (NexelythPlayerLocationService.Instance == null)
         {
             Debug.LogError(
@@ -126,8 +132,8 @@ public class NexelythMemoLocationService : MonoBehaviour
             return;
         }
 
-        // 修改原因：Memo 必須保存玩家按下存點當下的實際位置，
-        // 因此向 Player Location Service 即時取得目前 Map + X/Y。
+        // Memo 必須保存玩家按下存點當下的實際位置，
+        // 因此即時取得目前玩家所在的 Map + X/Y。
         NexelythWorldLocation currentLocation =
             NexelythPlayerLocationService.Instance
                 .GetCurrentWorldLocation();
@@ -141,8 +147,6 @@ public class NexelythMemoLocationService : MonoBehaviour
             return;
         }
 
-        // 修改原因：建立獨立的 Runtime Location，
-        // 避免玩家後續移動或傳送影響已保存的 Memo 位置。
         NexelythWorldLocation savedLocation =
             new NexelythWorldLocation(
                 currentLocation.MapId,
@@ -150,19 +154,73 @@ public class NexelythMemoLocationService : MonoBehaviour
                 currentLocation.Y
             );
 
-        // 修改原因：實際 Slot 內容由 NexelythMemoSlot 自己管理，
-        // Service 只負責協調玩家目前位置與指定 Slot。
-        memoSlots[slotIndex].Save(
+        // 修改原因：Memo 採用固定保留最近 3 筆的 Rolling History。
+        // 若仍有空 Slot，直接存入第一個空 Slot。
+        for (int i = 0;
+             i < MemoSlotCount;
+             i++)
+        {
+            if (!memoSlots[i].IsSaved)
+            {
+                memoSlots[i].Save(
+                    savedLocation
+                );
+
+                Debug.Log(
+                    $"[NEXELYTH Memo] " +
+                    $"Saved Map={savedLocation.MapId}, " +
+                    $"Coordinate=({savedLocation.X}, {savedLocation.Y}) " +
+                    $"to Slot {i}"
+                );
+
+                SaveMemoFile();
+
+                return;
+            }
+        }
+
+        // 修改原因：3 個 Memo Slot 全部已滿時，
+        // 移除最舊紀錄並將後面的紀錄依序往前移。
+        memoSlots[0].Save(
+            memoSlots[1].Location
+        );
+
+        memoSlots[1].Save(
+            memoSlots[2].Location
+        );
+
+        memoSlots[2].Save(
             savedLocation
         );
 
         Debug.Log(
             $"[NEXELYTH Memo] " +
-            $"Slot={slotIndex}, " +
-            $"Saved Map={savedLocation.MapId}, " +
+            $"Oldest memo removed. " +
+            $"New memo saved: Map={savedLocation.MapId}, " +
             $"Coordinate=({savedLocation.X}, {savedLocation.Y})"
         );
+
+        SaveMemoFile();
     }
+
+    private void SaveMemoFile()
+    {
+        // 修改原因：每次 Memo 紀錄變更後立即保存完整 Slot 狀態，
+        // 避免玩家離開遊戲後遺失最近的 Memo 紀錄。
+        if (memoSaveService == null)
+        {
+            Debug.LogError(
+                "[NEXELYTH Memo] Memo Save Service is not available."
+            );
+
+            return;
+        }
+
+        memoSaveService.Save(
+            this
+        );
+    }
+
 
     public void TravelToMemoLocation(
         int slotIndex
@@ -316,17 +374,10 @@ public class NexelythMemoLocationService : MonoBehaviour
     // Compatibility API
     // =========================================================
 
-    public void SaveCurrentLocation()
-    {
-        // 修改原因：保留原本無參數版本，
-        // 讓既有程式仍可使用，預設操作 Slot 0。
-        SaveCurrentLocation(0);
-    }
-
     public void TravelToMemoLocation()
     {
-        // 修改原因：保留原本無參數版本，
-        // 讓既有程式仍可使用，預設傳送至 Slot 0。
+        // 修改原因：保留原本無參數傳送版本，
+        // 讓既有程式仍可使用，預設傳送至最舊的 Memo 紀錄 Slot 0。
         TravelToMemoLocation(0);
     }
 
@@ -359,28 +410,12 @@ public class NexelythMemoLocationService : MonoBehaviour
     // Development Test Tools
     // =========================================================
 
-    [ContextMenu("Test Save Slot 0")]
-    private void TestSaveSlot0()
+    [ContextMenu("Test Save Current Memo")]
+    private void TestSaveCurrentMemo()
     {
-        // 修改原因：正式 VR UI 完成前，
-        // 透過 Inspector 驗證 Slot 0 存點功能。
-        SaveCurrentLocation(0);
-    }
-
-    [ContextMenu("Test Save Slot 1")]
-    private void TestSaveSlot1()
-    {
-        // 修改原因：正式 VR UI 完成前，
-        // 透過 Inspector 驗證 Slot 1 存點功能。
-        SaveCurrentLocation(1);
-    }
-
-    [ContextMenu("Test Save Slot 2")]
-    private void TestSaveSlot2()
-    {
-        // 修改原因：正式 VR UI 完成前，
-        // 透過 Inspector 驗證 Slot 2 存點功能。
-        SaveCurrentLocation(2);
+        // 修改原因：Memo 改為自動管理最近 3 筆紀錄，
+        // 玩家只需要執行存點，不再指定要寫入哪一個 Slot。
+        SaveCurrentLocation();
     }
 
     [ContextMenu("Test Travel To Slot 0")]
