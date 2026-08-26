@@ -2,13 +2,16 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.XR.CoreUtils;
-//固定地點 Asset
-//NexelythWorldLocationSO
-//→ Portal / Fast Travel
+//Aurevane → Aurevane
+//Memo / 城內傳送
+//→ 不 Load Scene
+//→ 直接移動 XR Origin
 
-//Runtime 地點
-//NexelythWorldLocation
-//→ Memo / Save / Respawn
+//Aurevane → SylvarisFields
+//跨地圖
+//→ Load SylvarisFields
+//→ 移動 XR Origin
+//→ Unload Aurevane
 public class NexelythWorldSceneManager :
     MonoBehaviour,
     IWorldTravelService
@@ -176,8 +179,8 @@ public class NexelythWorldSceneManager :
         Vector2Int targetCoordinate
     )
     {
-        // 修改原因：避免玩家連續觸發 Portal 時，
-        // 同一時間執行多次 Scene 切換。
+        // 避免玩家連續觸發 Portal 或 Memo 時，
+        // 同一時間執行多次世界傳送。
         if (isTransitioning)
             return;
 
@@ -186,14 +189,107 @@ public class NexelythWorldSceneManager :
             Debug.LogError(
                 "[NEXELYTH World Scene Manager] Target scene name is empty."
             );
+
             return;
         }
 
+        // 如果目的地仍然位於目前 World Scene，
+        // 不需要重新 Load / Unload Scene，只需移動玩家到指定 X/Y。
+        if (targetSceneName == currentWorldSceneName)
+        {
+            MovePlayerWithinCurrentWorld(
+                targetCoordinate
+            );
+
+            return;
+        }
+
+        //  只有跨 World Scene 傳送時，
+        // 才執行完整的 Additive Load / Unload 流程。
         StartCoroutine(
             ChangeWorldSceneRoutine(
                 targetSceneName,
                 targetCoordinate
             )
+        );
+    }
+
+    private void MovePlayerWithinCurrentWorld(
+        Vector2Int targetCoordinate
+    )
+    {
+        Scene currentScene =
+            SceneManager.GetSceneByName(
+                currentWorldSceneName
+            );
+
+        if (!currentScene.IsValid() ||
+            !currentScene.isLoaded)
+        {
+            Debug.LogError(
+                $"[NEXELYTH World Scene Manager] Current scene is invalid: {currentWorldSceneName}"
+            );
+
+            return;
+        }
+
+        //  同 Scene 傳送仍然使用該地圖既有的 Map Coordinate System，
+        // 確保 Memo、Fast Travel 與 Portal 使用相同的 Map X/Y 規則。
+        NexelythMapCoordinateSystem coordinateSystem =
+            EnsureMapCoordinateSystem(
+                currentScene
+            );
+
+        if (coordinateSystem == null)
+        {
+            Debug.LogError(
+                $"[NEXELYTH World Scene Manager] Map Coordinate System not found: {currentWorldSceneName}"
+            );
+
+            return;
+        }
+
+        XROrigin xrOrigin =
+            Object.FindFirstObjectByType<XROrigin>();
+
+        if (xrOrigin == null)
+        {
+            Debug.LogError(
+                "[NEXELYTH World Scene Manager] XR Origin not found."
+            );
+
+            return;
+        }
+
+        Vector3 targetWorldPosition =
+            coordinateSystem.MapCoordinateToWorld(
+                targetCoordinate,
+                0f
+            );
+
+        //  同一張 World Scene 內傳送時直接移動長駐 XR Origin，
+        // 避免重新載入整張地圖造成不必要的 Scene IO 與物件初始化。
+        xrOrigin.transform.position =
+            targetWorldPosition;
+
+        //  同 Scene 傳送後也必須同步更新玩家目前 Map + X/Y，
+        // 讓 Memo、Save、Respawn 等系統取得正確位置。
+        if (NexelythPlayerLocationService.Instance != null)
+        {
+            NexelythPlayerLocationService.Instance.SetCurrentLocation(
+                new NexelythWorldLocation(
+                    currentWorldSceneName,
+                    targetCoordinate.x,
+                    targetCoordinate.y
+                )
+            );
+        }
+
+        Debug.Log(
+            $"[NEXELYTH World Scene Manager] " +
+            $"Moved within world: {currentWorldSceneName}, " +
+            $"Coordinate=({targetCoordinate.x}, {targetCoordinate.y}), " +
+            $"World={targetWorldPosition}"
         );
     }
 
