@@ -35,6 +35,8 @@ using UnityEngine;
 
 public class NexelythMemoLocationService : MonoBehaviour
 {
+    //  Memo 系統目前最高支援 3 個實體 Slot，
+    // 實際可使用數量之後由玩家的 MEMO 技能等級決定。
     private const int MemoSlotCount = 3;
 
     public static NexelythMemoLocationService Instance { get; private set; }
@@ -54,6 +56,9 @@ public class NexelythMemoLocationService : MonoBehaviour
 
     public int SlotCount =>
         MemoSlotCount;
+
+    public int AvailableSlotCount =>
+    GetAvailableSlotCount();
 
 
     // =========================================================
@@ -132,8 +137,20 @@ public class NexelythMemoLocationService : MonoBehaviour
             return;
         }
 
-        // Memo 必須保存玩家按下存點當下的實際位置，
-        // 因此即時取得目前玩家所在的 Map + X/Y。
+        int availableSlotCount =
+            AvailableSlotCount;
+
+        //  玩家尚未取得 MEMO 技能時，
+        // 不應允許建立任何 Memo 存點。
+        if (availableSlotCount <= 0)
+        {
+            Debug.LogWarning(
+                "[NEXELYTH Memo] MEMO skill is not available."
+            );
+
+            return;
+        }
+
         NexelythWorldLocation currentLocation =
             NexelythPlayerLocationService.Instance
                 .GetCurrentWorldLocation();
@@ -154,10 +171,9 @@ public class NexelythMemoLocationService : MonoBehaviour
                 currentLocation.Y
             );
 
-        // 修改原因：Memo 採用固定保留最近 3 筆的 Rolling History。
-        // 若仍有空 Slot，直接存入第一個空 Slot。
+        //  只在玩家目前技能等級允許的 Slot 範圍內尋找空位。
         for (int i = 0;
-             i < MemoSlotCount;
+             i < availableSlotCount;
              i++)
         {
             if (!memoSlots[i].IsSaved)
@@ -179,17 +195,18 @@ public class NexelythMemoLocationService : MonoBehaviour
             }
         }
 
-        // 修改原因：3 個 Memo Slot 全部已滿時，
-        // 移除最舊紀錄並將後面的紀錄依序往前移。
-        memoSlots[0].Save(
-            memoSlots[1].Location
-        );
+        //  可用 Slot 全部已滿時，
+        // 只在目前技能等級允許的範圍內淘汰最舊紀錄。
+        for (int i = 0;
+             i < availableSlotCount - 1;
+             i++)
+        {
+            memoSlots[i].Save(
+                memoSlots[i + 1].Location
+            );
+        }
 
-        memoSlots[1].Save(
-            memoSlots[2].Location
-        );
-
-        memoSlots[2].Save(
+        memoSlots[availableSlotCount - 1].Save(
             savedLocation
         );
 
@@ -197,11 +214,13 @@ public class NexelythMemoLocationService : MonoBehaviour
             $"[NEXELYTH Memo] " +
             $"Oldest memo removed. " +
             $"New memo saved: Map={savedLocation.MapId}, " +
-            $"Coordinate=({savedLocation.X}, {savedLocation.Y})"
+            $"Coordinate=({savedLocation.X}, {savedLocation.Y}), " +
+            $"AvailableSlots={availableSlotCount}"
         );
 
         SaveMemoFile();
     }
+
 
     private void SaveMemoFile()
     {
@@ -386,6 +405,36 @@ public class NexelythMemoLocationService : MonoBehaviour
     // Private Helpers
     // =========================================================
 
+    private int GetAvailableSlotCount()
+    {
+        //  Memo 可用 Slot 數量由玩家目前的 MEMO 技能等級決定，
+        // 未來登入 API 更新 PlayerSkillService 後，Gameplay 不需要知道資料來源。
+        if (NexelythPlayerSkillService.Instance == null)
+        {
+            return 0;
+        }
+
+        NexelythPlayerSkillData memoSkill =
+            NexelythPlayerSkillService.Instance.GetSkill(
+                "MEMO"
+            );
+
+        //  玩家沒有 MEMO 技能時，
+        // 不應提供任何 Memo Slot。
+        if (memoSkill == null)
+        {
+            return 0;
+        }
+
+        //  目前規則暫定 MEMO Lv1 / Lv2 / Lv3
+        // 分別提供 1 / 2 / 3 個 Slot，並限制不超過系統最大容量。
+        return Mathf.Clamp(
+            memoSkill.level,
+            0,
+            MemoSlotCount
+        );
+    }
+
     private bool IsValidSlotIndex(
         int slotIndex
     )
@@ -409,6 +458,8 @@ public class NexelythMemoLocationService : MonoBehaviour
     // =========================================================
     // Development Test Tools
     // =========================================================
+
+
 
     [ContextMenu("Test Save Current Memo")]
     private void TestSaveCurrentMemo()
