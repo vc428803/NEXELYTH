@@ -34,6 +34,6 @@ This repository is provided for **interview and technical showcase** only.
 Commercial use is strictly prohibited.
 
 ## License
-Copyright (c) 2026 Vic / Nexelyth  
-All rights reserved.  
+Copyright (c) 2026 Nexelyth
+All rights reserved.
 Unauthorized commercial use is prohibited.
