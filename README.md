@@ -22,11 +22,12 @@ Key features:
   ScriptableObject-based fixed positions for portals and landmarks.
 
 ## Development Roadmap
-- Transition from **Domain Prototype** to **Persistence / DB Schema** stage
-- Integrate **Spring Boot REST API backend** for world state synchronization
-- Expand Memo system with persistence (database-backed slots)
-- Implement transaction-safe player state updates
-- Future integration with VR Unity world state and external services
+- Transition from **Domain Prototype** to **Persistence / DB Schema** stage  
+- Integrate a **C# / ASP.NET Core REST API backend** for world state synchronization  
+- Expand Memo system with persistence (database-backed slots)  
+- Implement transaction-safe player state updates (e.g., using EF Core transactions)  
+- Future integration with **Unity VR world state** and external services
+
 
 ## Purpose
 This repository is provided for **interview and technical showcase** only.  
