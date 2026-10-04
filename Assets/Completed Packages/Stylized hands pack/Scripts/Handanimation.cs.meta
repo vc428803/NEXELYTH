@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: cc8941ad77a8236449ff4872f0a4d0c1
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 180829
+  packageName: Vert Vaults - VR Hands pack
+  packageVersion: 1.0
+  assetPath: Assets/Completed Packages/Stylized hands pack/Scripts/Handanimation.cs
+  uploadId: 394889
