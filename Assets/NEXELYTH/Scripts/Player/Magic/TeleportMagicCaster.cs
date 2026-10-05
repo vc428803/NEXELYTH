@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class TeleportMagicCaster : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Transform playerRoot;
+    [SerializeField] private Transform headTransform;
     [SerializeField] private GameObject magicCirclePrefab;
 
     [Header("Spawn Settings")]
@@ -37,9 +37,9 @@ public class TeleportMagicCaster : MonoBehaviour
 
     private void SpawnMagicCircle()
     {
-        if (playerRoot == null)
+        if (headTransform == null)
         {
-            Debug.LogWarning("[TeleportMagicCaster] Player Root is missing.");
+            Debug.LogWarning("[TeleportMagicCaster] Head Transform is missing.");
             return;
         }
 
@@ -49,7 +49,8 @@ public class TeleportMagicCaster : MonoBehaviour
             return;
         }
 
-        Vector3 forward = playerRoot.forward;
+        // 取玩家「現在看向的方向」
+        Vector3 forward = headTransform.forward;
         forward.y = 0f;
 
         if (forward.sqrMagnitude < 0.001f)
@@ -57,11 +58,11 @@ public class TeleportMagicCaster : MonoBehaviour
 
         forward.Normalize();
 
+        // 以玩家目前頭部位置為基準，在前方生成
         Vector3 targetPosition =
-            playerRoot.position +
+            headTransform.position +
             forward * spawnDistance;
 
-        // 從目標位置上方往下打 Raycast 找地面
         Vector3 rayOrigin =
             targetPosition +
             Vector3.up * 2f;
@@ -74,12 +75,10 @@ public class TeleportMagicCaster : MonoBehaviour
             Physics.DefaultRaycastLayers,
             QueryTriggerInteraction.Ignore))
         {
-            // 稍微離地，避免 Z-Fighting
             Vector3 spawnPosition =
                 hit.point +
                 hit.normal * 0.01f;
 
-            // 讓法陣貼合地面角度
             Quaternion spawnRotation =
                 Quaternion.FromToRotation(
                     Vector3.up,
@@ -90,9 +89,6 @@ public class TeleportMagicCaster : MonoBehaviour
                 spawnPosition,
                 spawnRotation
             );
-
-            Debug.Log(
-                $"[TeleportMagicCaster] Magic circle spawned on ground at {spawnPosition}.");
         }
         else
         {
@@ -100,5 +96,4 @@ public class TeleportMagicCaster : MonoBehaviour
                 "[TeleportMagicCaster] Ground not found.");
         }
     }
-
 }

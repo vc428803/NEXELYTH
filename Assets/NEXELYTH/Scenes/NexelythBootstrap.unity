@@ -592,7 +592,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4097c3ea3d32a8149b309abbbc272ead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TeleportMagicCaster
-  playerRoot: {fileID: 680742427}
+  headTransform: {fileID: 1844930002}
   magicCirclePrefab: {fileID: 1461287072757598147, guid: 556907003ea72de45aa3d95bebffcc69, type: 3}
   spawnDistance: 1.5
 --- !u!1 &632433780
