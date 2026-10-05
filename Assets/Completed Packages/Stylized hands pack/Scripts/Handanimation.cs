@@ -1,29 +1,53 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
 
 public class Handanimation : MonoBehaviour
 {
-    [Tooltip("Don't forget to assign the prefiew animator!")]
-    public Animator anim;
+    [Header("References")]
+    [SerializeField] private Animator anim;
 
-    [Tooltip("Set this integer to preview the animations, ranges from 0 - 14 for a total of 15 animations!")]
-    public int animationindex;
-  
-    void Update()
+    [Header("Animation Index")]
+    [SerializeField] private int idleIndex = 8;
+    [SerializeField] private int castIndex = 0;
+
+    [Header("Cast Timing")]
+    [SerializeField] private float castDuration = 1.5f;
+
+    private bool isCasting;
+
+    private void Start()
     {
-            AnimationIndex();
-            SetAnimation();
+        SetAnimation(idleIndex);
     }
 
-    private int AnimationIndex()
+    public void PlayCast()
     {
-        return Mathf.Clamp(animationindex,0,14);
+        if (isCasting)
+            return;
+
+        StartCoroutine(CastRoutine());
     }
 
-    private void SetAnimation()
+    private IEnumerator CastRoutine()
     {
-        anim.SetInteger("animationIndex", AnimationIndex());
+        isCasting = true;
+
+        SetAnimation(castIndex);
+
+        yield return new WaitForSeconds(castDuration);
+
+        SetAnimation(idleIndex);
+
+        isCasting = false;
+    }
+
+    private void SetAnimation(int index)
+    {
+        if (anim == null)
+            return;
+
+        int safeIndex = Mathf.Clamp(index, 0, 14);
+
+        anim.SetInteger("animationIndex", safeIndex);
     }
 }
