@@ -76,7 +76,7 @@ public class VRHandVisualController : MonoBehaviour
         }
 
         return false;
-    }
+    } 
     private void UpdateHandPose(bool isCasting, bool isMoving)
     {
         Vector3 targetPosition;
