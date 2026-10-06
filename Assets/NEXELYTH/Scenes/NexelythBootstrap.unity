@@ -594,6 +594,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TeleportMagicCaster
   headTransform: {fileID: 1844930002}
   magicCirclePrefab: {fileID: 1461287072757598147, guid: 556907003ea72de45aa3d95bebffcc69, type: 3}
+  triggerAction: {fileID: -2439264783773714294, guid: b6d5c44ebe3244b7692e81ae8265eb22, type: 3}
   spawnDistance: 1.5
 --- !u!1 &632433780
 GameObject:

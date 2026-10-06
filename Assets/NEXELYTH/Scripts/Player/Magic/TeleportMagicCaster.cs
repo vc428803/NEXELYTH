@@ -7,25 +7,33 @@ public class TeleportMagicCaster : MonoBehaviour
     [SerializeField] private Transform headTransform;
     [SerializeField] private GameObject magicCirclePrefab;
 
+    [Header("Input")]
+    [SerializeField] private InputActionReference triggerAction;
+
     [Header("Spawn Settings")]
     [SerializeField] private float spawnDistance = 1.5f;
 
-    private void Update()
+    private void OnEnable()
     {
-        if (Keyboard.current == null)
-            return;
-
-        bool shiftPressed =
-            Keyboard.current.leftShiftKey.isPressed ||
-            Keyboard.current.rightShiftKey.isPressed;
-
-        bool tPressed =
-            Keyboard.current.tKey.wasPressedThisFrame;
-
-        if (shiftPressed && tPressed)
+        if (triggerAction != null)
         {
-            Cast();
+            triggerAction.action.Enable();
+            triggerAction.action.performed += OnTriggerPerformed;
         }
+    }
+
+    private void OnDisable()
+    {
+        if (triggerAction != null)
+        {
+            triggerAction.action.performed -= OnTriggerPerformed;
+            triggerAction.action.Disable();
+        }
+    }
+
+    private void OnTriggerPerformed(InputAction.CallbackContext context)
+    {
+        Cast();
     }
 
     public void Cast()
