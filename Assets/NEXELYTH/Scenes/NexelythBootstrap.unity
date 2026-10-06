@@ -2020,13 +2020,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1929202942}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b6fd7418b62d83f418552000bdcbef01, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VRHandVisualController
   handPoseRoot: {fileID: 1929202943}
   moveAction: {fileID: 6972639530819350904, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  triggerAction: {fileID: -2439264783773714294, guid: b6d5c44ebe3244b7692e81ae8265eb22, type: 3}
   idlePosition: {x: -0.1, y: -0.25, z: 0}
   idleRotation: {x: -100, y: -180, z: 10}
   castPosition: {x: 0, y: 0, z: 0.05}

@@ -8,6 +8,7 @@ public class VRHandVisualController : MonoBehaviour
 
     [Header("Input")]
     [SerializeField] private InputActionReference moveAction;
+    [SerializeField] private InputActionReference triggerAction;
 
     [Header("Idle Pose")]
     [SerializeField]
@@ -38,29 +39,22 @@ public class VRHandVisualController : MonoBehaviour
     [SerializeField] private float positionSpeed = 6f;
     [SerializeField] private float rotationSpeed = 6f;
 
+    private bool isCasting;
+
     private void Update()
     {
-        bool isCasting = IsCasting();
         bool isMoving = IsMoving();
 
         UpdateHandPose(isCasting, isMoving);
     }
 
-    private bool IsCasting()
-    {
-        if (Keyboard.current == null)
-            return false;
-
-        return Keyboard.current.leftShiftKey.isPressed &&
-               Keyboard.current.tKey.isPressed;
-    }
-
     private bool IsMoving()
     {
-        // 先讀 XR Move Action
+        // 優先讀 XR Move Action
         if (moveAction != null && moveAction.action != null)
         {
-            Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
+            Vector2 moveInput =
+                moveAction.action.ReadValue<Vector2>();
 
             if (moveInput.sqrMagnitude > 0.01f)
                 return true;
@@ -76,13 +70,14 @@ public class VRHandVisualController : MonoBehaviour
         }
 
         return false;
-    } 
-    private void UpdateHandPose(bool isCasting, bool isMoving)
+    }
+
+    private void UpdateHandPose(bool casting, bool isMoving)
     {
         Vector3 targetPosition;
         Vector3 targetRotationEuler;
 
-        if (isCasting)
+        if (casting)
         {
             // 施法時停止 Walking Swing
             targetPosition = castPosition;
@@ -129,19 +124,63 @@ public class VRHandVisualController : MonoBehaviour
             );
     }
 
+    private void OnTriggerStarted(
+        InputAction.CallbackContext context)
+    {
+        isCasting = true;
+
+        Debug.Log(
+            "[VRHandVisualController] Cast pose started.");
+    }
+
+    private void OnTriggerCanceled(
+        InputAction.CallbackContext context)
+    {
+        isCasting = false;
+
+        Debug.Log(
+            "[VRHandVisualController] Cast pose ended.");
+    }
+
     private void OnEnable()
     {
-        if (moveAction != null && moveAction.action != null)
+        if (moveAction != null &&
+            moveAction.action != null)
         {
             moveAction.action.Enable();
+        }
+
+        if (triggerAction != null &&
+            triggerAction.action != null)
+        {
+            triggerAction.action.Enable();
+
+            triggerAction.action.started +=
+                OnTriggerStarted;
+
+            triggerAction.action.canceled +=
+                OnTriggerCanceled;
         }
     }
 
     private void OnDisable()
     {
-        if (moveAction != null && moveAction.action != null)
+        if (moveAction != null &&
+            moveAction.action != null)
         {
             moveAction.action.Disable();
+        }
+
+        if (triggerAction != null &&
+            triggerAction.action != null)
+        {
+            triggerAction.action.started -=
+                OnTriggerStarted;
+
+            triggerAction.action.canceled -=
+                OnTriggerCanceled;
+
+            triggerAction.action.Disable();
         }
     }
 }
