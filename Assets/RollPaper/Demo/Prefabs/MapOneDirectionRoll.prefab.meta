@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 64eab345451800342a7ef0b41ef390bc
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 231823
+  packageName: Roll Paper, Scrolls or Maps
+  packageVersion: 1.2
+  assetPath: Assets/RollPaper/Demo/Prefabs/MapOneDirectionRoll.prefab
+  uploadId: 605546

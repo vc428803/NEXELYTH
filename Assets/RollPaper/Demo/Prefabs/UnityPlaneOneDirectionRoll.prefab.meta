@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: df1137fa87e53e54783d839aea09bbe0
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 231823
+  packageName: Roll Paper, Scrolls or Maps
+  packageVersion: 1.2
+  assetPath: Assets/RollPaper/Demo/Prefabs/UnityPlaneOneDirectionRoll.prefab
+  uploadId: 605546

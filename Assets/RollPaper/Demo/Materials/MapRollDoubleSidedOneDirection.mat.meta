@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 17f214257256bf74990ace3680a8d151
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 231823
+  packageName: Roll Paper, Scrolls or Maps
+  packageVersion: 1.2
+  assetPath: Assets/RollPaper/Demo/Materials/MapRollDoubleSidedOneDirection.mat
+  uploadId: 605546
