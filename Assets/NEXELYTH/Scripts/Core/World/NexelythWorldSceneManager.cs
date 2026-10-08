@@ -353,13 +353,28 @@ public class NexelythWorldSceneManager :
             yield break;
         }
 
-        // 修改原因：將目標地圖 X/Y 轉換成 Unity 世界座標，
-        // 讓 Portal、Memo、Fast Travel 都能共用 Map + Coordinate 傳送格式。
+        // 先取得目的地的水平座標。
         Vector3 targetWorldPosition =
             coordinateSystem.MapCoordinateToWorld(
                 targetCoordinate,
                 0f
             );
+
+        // 從已載入的目標 Scene 尋找原生 Terrain。
+        foreach (GameObject root in targetScene.GetRootGameObjects())
+        {
+            Terrain terrain = root.GetComponentInChildren<Terrain>(true);
+
+            if (terrain == null)
+                continue;
+
+            // 將玩家放置在地形表面。
+            targetWorldPosition.y =
+                terrain.SampleHeight(targetWorldPosition)
+                + terrain.transform.position.y;
+
+            break;
+        }
 
         XROrigin xrOrigin =
             Object.FindFirstObjectByType<XROrigin>();

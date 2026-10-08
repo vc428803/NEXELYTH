@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "name": "XR Interaction Simulator Controls",
     "maps": [
         {
@@ -234,7 +235,7 @@
                 {
                     "name": "negative",
                     "id": "732e790c-f2a2-4f90-b525-53139a358de7",
-                    "path": "<Keyboard>/s",
+                    "path": "<Keyboard>/f10",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -245,7 +246,7 @@
                 {
                     "name": "positive",
                     "id": "d5a98916-ade7-419d-a138-86bcdf05670f",
-                    "path": "<Keyboard>/w",
+                    "path": "<Keyboard>/f9",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
