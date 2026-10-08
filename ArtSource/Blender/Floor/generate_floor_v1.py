@@ -12,7 +12,10 @@ SEED = 428803
 TILE_SIZE = 2.0
 GRID = 4
 GAP = 0.018
-OUT_DIR = Path(bpy.path.abspath('//')) if bpy.data.filepath else Path.home() / 'Desktop'
+
+# 以 Python 腳本所在資料夾為基準，不依賴電腦的磁碟位置
+OUT_DIR = Path(__file__).resolve().parent
+OUT_DIR.mkdir(parents=True, exist_ok=True)
 random.seed(SEED)
 
 # Only clear objects in this temporary modeling scene.
