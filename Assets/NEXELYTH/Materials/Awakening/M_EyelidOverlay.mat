@@ -112,7 +112,7 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
-    - _EyeOpen: 0.65
+    - _EyeOpen: 1
     - _EyeWidth: 0.9
     - _GlossMapScale: 0
     - _Glossiness: 0
