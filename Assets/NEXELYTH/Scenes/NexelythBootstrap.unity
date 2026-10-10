@@ -1154,6 +1154,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1765589198645630841, guid: 76d72470f96b7124b84bcf54f7e85f2f, type: 3}
   m_PrefabInstance: {fileID: 777539651}
   m_PrefabAsset: {fileID: 0}
+--- !u!23 &996523360 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4223235606528421369, guid: 76d72470f96b7124b84bcf54f7e85f2f, type: 3}
+  m_PrefabInstance: {fileID: 777539651}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &996523362 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5880699614102573186, guid: 76d72470f96b7124b84bcf54f7e85f2f, type: 3}
@@ -2279,6 +2284,8 @@ GameObject:
   - component: {fileID: 2011657872}
   - component: {fileID: 2011657873}
   - component: {fileID: 2011657874}
+  - component: {fileID: 2011657875}
+  - component: {fileID: 2011657876}
   m_Layer: 0
   m_Name: NexelythMapSystem
   m_TagString: Untagged
@@ -2316,7 +2323,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NexelythPortableMapController
   mapAnchor: {fileID: 926809559}
   worldMap: {fileID: 996523359}
-  playerHead: {fileID: 0}
+  playerHead: {fileID: 1844930002}
   distance: 1.2
   verticalOffset: -0.15
   toggleKey: 27
@@ -2339,6 +2346,35 @@ MonoBehaviour:
   maxDistance: 2
   zoomStep: 0.12
   smoothSpeed: 12
+--- !u!114 &2011657875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011657871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a56d9c09c7627b64ead0d386849de45b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NexelythMapPlayerMarker
+  positionTester: {fileID: 2011657876}
+  mapRenderer: {fileID: 996523360}
+--- !u!114 &2011657876
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011657871}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62ce5543131289f4282ce0ef8ef57a1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NexelythMapPositionTester
+  playerTransform: {fileID: 1844930002}
+  regionalBoundsJson: {fileID: 4900000, guid: 51afd3ba0d39ac84288dbebf8e5601dc, type: 3}
+  logPosition: 0
 --- !u!1 &2055422096
 GameObject:
   m_ObjectHideFlags: 0

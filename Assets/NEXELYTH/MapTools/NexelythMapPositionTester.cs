@@ -18,13 +18,21 @@ public class NexelythMapPositionTester : MonoBehaviour
 
     private NexelythMapBoundsData bounds;
 
+    public Vector3 CurrentWorldPosition { get; private set; }
+    public Vector2 CurrentUV { get; private set; }
+    public Vector2 CurrentPixel { get; private set; }
+    public bool IsInsideMap { get; private set; }
+
+    public bool IsInitialized { get; private set; }
+
     private void Start()
     {
         if (regionalBoundsJson == null)
         {
             Debug.LogError(
-                "[NEXELYTH] Regional bounds JSON missing."
+                "[NEXELYTH MAP] Regional bounds JSON missing."
             );
+
             enabled = false;
             return;
         }
@@ -34,59 +42,75 @@ public class NexelythMapPositionTester : MonoBehaviour
             var xrOrigin =
                 FindFirstObjectByType<Unity.XR.CoreUtils.XROrigin>();
 
-            if (xrOrigin != null)
-            {
-                playerTransform = xrOrigin.transform;
-
-                Debug.Log(
-                    "[NEXELYTH] XR Origin found automatically: " +
-                    playerTransform.name
-                );
-            }
-            else
+            if (xrOrigin == null)
             {
                 Debug.LogError(
-                    "[NEXELYTH] XR Origin not found. " +
-                    "Make sure NexelythBootstrap is loaded."
+                    "[NEXELYTH MAP] XR Origin not found."
                 );
 
                 enabled = false;
                 return;
             }
+
+            playerTransform = xrOrigin.Camera != null
+                ? xrOrigin.Camera.transform
+                : xrOrigin.transform;
         }
 
         bounds = JsonUtility.FromJson<NexelythMapBoundsData>(
             regionalBoundsJson.text
         );
 
+        if (bounds == null)
+        {
+            Debug.LogError(
+                "[NEXELYTH MAP] Invalid bounds JSON."
+            );
+
+            enabled = false;
+            return;
+        }
+
+        IsInitialized = true;
+
         Debug.Log(
-            "[NEXELYTH] Regional map coordinates initialized."
+            "[NEXELYTH MAP] Regional coordinates initialized."
         );
     }
 
     private void Update()
     {
-        Vector3 worldPosition = playerTransform.position;
-
-        Vector2 uv =
-            NexelythMapCoordinateConverter.WorldToUV(
-                worldPosition,
-                bounds
-            );
-
-        if (!logPosition)
+        if (!IsInitialized || playerTransform == null)
             return;
 
-        Vector2 pixel =
-            NexelythMapCoordinateConverter.UVToPixel(
-                uv,
+        CurrentWorldPosition = playerTransform.position;
+
+        CurrentUV =
+            NexelythMapCoordinateConverter.WorldToUV(
+                CurrentWorldPosition,
                 bounds
             );
 
-        Debug.Log(
-            $"[NEXELYTH MAP] World: {worldPosition} " +
-            $"UV: {uv} Pixel: {pixel} " +
-            $"Inside: {NexelythMapCoordinateConverter.IsInsideMap(uv)}"
-        );
+        CurrentPixel =
+            NexelythMapCoordinateConverter.UVToPixel(
+                CurrentUV,
+                bounds
+            );
+
+        IsInsideMap =
+            NexelythMapCoordinateConverter.IsInsideMap(
+                CurrentUV
+            );
+
+        if (logPosition)
+        {
+            Debug.Log(
+                $"[NEXELYTH MAP] " +
+                $"World: {CurrentWorldPosition} " +
+                $"UV: {CurrentUV} " +
+                $"Pixel: {CurrentPixel} " +
+                $"Inside: {IsInsideMap}"
+            );
+        }
     }
 }
