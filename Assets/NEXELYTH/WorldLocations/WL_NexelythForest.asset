@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: WL_NexelythForest
   m_EditorClassIdentifier: Assembly-CSharp::NexelythWorldLocationSO
   mapId: NexelythForest_V1
-  x: 249
-  y: 250
+  x: 125
+  y: 316
