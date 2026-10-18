@@ -1,71 +1,69 @@
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 public class NexelythSAOMenuController : MonoBehaviour
 {
     [Header("SAO Menu")]
-    [SerializeField]
-    private GameObject menuCanvas;
+    [SerializeField] private GameObject menuCanvas;
 
     [Header("SAO Category Flyout")]
+    [SerializeField] private GameObject categoryFlyout;
+
+    [Header("Additional Category Flyouts")]
+    [SerializeField] private GameObject socialFlyout;
+    [SerializeField] private GameObject chatFlyout;
+
+    [Header("Category Visuals")]
     [SerializeField]
-    private GameObject categoryFlyout;
+    private NexelythSAOCategoryVisual characterVisual;
+
+    [SerializeField]
+    private NexelythSAOCategoryVisual socialVisual;
+
+
+    [Header("Main Icon Sorting")]
+    [SerializeField] private RectTransform characterButton;
+    [SerializeField] private RectTransform socialButton;
+
+
+    [SerializeField]
+    private NexelythSAOCategoryVisual chatVisual;
+
+    private GameObject activeFlyout;
 
     private void Awake()
     {
-        // 啟動時先隱藏分類清單。
-        if (categoryFlyout != null)
-        {
-            categoryFlyout.SetActive(false);
-        }
+        CloseAllFlyouts();
 
-        // 啟動時隱藏整個玩家選單。
         if (menuCanvas != null)
-        {
             menuCanvas.SetActive(false);
-        }
     }
-
-
 
     private void Update()
     {
-        if (Time.frameCount % 300 == 0)
-        {
-            Debug.Log("[NEXELYTH SAO] Update is running", this);
-        }
-
         Keyboard keyboard = Keyboard.current;
 
         if (keyboard == null)
-        {
             return;
-        }
 
-        // M 鍵：開啟／關閉 SAO 選單
+        // M：開啟或關閉玩家選單
         if (keyboard.mKey.wasPressedThisFrame)
-        {
-            Debug.Log("[NEXELYTH SAO] M key detected!", this);
             ToggleMenu();
-        }
 
-        // F8 鍵：檢查滑鼠目前命中的 UI 物件
+        // F8：測試 UI Raycast
         if (keyboard.f8Key.wasPressedThisFrame)
-        {
-            Debug.Log("[NEXELYTH SAO] F8 UI Raycast Test", this);
             DebugUIRaycast();
-        }
     }
-
-
 
     public void ToggleMenu()
     {
         if (menuCanvas == null)
         {
             Debug.LogWarning(
-                "[NEXELYTH] SAO Menu Canvas 尚未指定。",
+                "[NEXELYTH SAO] Menu Canvas missing.",
                 this
             );
             return;
@@ -73,61 +71,167 @@ public class NexelythSAOMenuController : MonoBehaviour
 
         bool shouldOpen = !menuCanvas.activeSelf;
 
-        // 每次開關主選單，都先收起第二層分類。
-        if (categoryFlyout != null)
-        {
-            categoryFlyout.SetActive(false);
-        }
-
+        CloseAllFlyouts();
         menuCanvas.SetActive(shouldOpen);
     }
 
-
+    // Character 主選單
+    // 保留原本 Button OnClick 綁定
     public void ToggleCategoryFlyout()
     {
-        Debug.Log("[NEXELYTH SAO] Character button clicked!", this);
+        ToggleFlyout(categoryFlyout);
+    }
 
-        if (categoryFlyout == null)
+    // Social 主選單
+    public void ToggleSocialFlyout()
+    {
+        ToggleFlyout(socialFlyout);
+    }
+
+    // Chat 主選單
+    public void ToggleChatFlyout()
+    {
+        ToggleFlyout(chatFlyout);
+    }
+
+    private void ToggleFlyout(GameObject target)
+    {
+        if (target == null)
         {
             Debug.LogWarning(
-                "[NEXELYTH] Category Flyout 尚未指定.",
+                "[NEXELYTH SAO] Flyout not assigned.",
                 this
             );
             return;
         }
 
-        categoryFlyout.SetActive(!categoryFlyout.activeSelf);
+        // 再次點擊目前選中的分類 → 收合
+        if (activeFlyout == target && target.activeSelf)
+        {
+            CloseAllFlyouts();
+
+            Debug.Log(
+                "[NEXELYTH SAO] Category collapsed.",
+                this
+            );
+
+            return;
+        }
+
+        // 切換分類前，關閉其他選單並清除高亮
+        CloseAllFlyouts();
+
+
+        target.SetActive(true);
+        activeFlyout = target;
+
+        MoveSelectedIconToTop(target);
+        UpdateCategoryVisuals(target);
+
+
+        Debug.Log(
+            $"[NEXELYTH SAO] Opened: {target.name}",
+            this
+        );
     }
 
+    private void UpdateCategoryVisuals(GameObject selectedFlyout)
+    {
+        if (characterVisual != null)
+        {
+            characterVisual.SetSelected(
+                selectedFlyout == categoryFlyout
+            );
+        }
 
+        if (socialVisual != null)
+        {
+            socialVisual.SetSelected(
+                selectedFlyout == socialFlyout
+            );
+        }
+
+        if (chatVisual != null)
+        {
+            chatVisual.SetSelected(
+                selectedFlyout == chatFlyout
+            );
+        }
+    }
+
+    private void CloseAllFlyouts()
+    {
+        if (categoryFlyout != null)
+            categoryFlyout.SetActive(false);
+
+        if (socialFlyout != null)
+            socialFlyout.SetActive(false);
+
+        if (chatFlyout != null)
+            chatFlyout.SetActive(false);
+
+        activeFlyout = null;
+
+        // 全部恢復未選取狀態
+        UpdateCategoryVisuals(null);
+    }
 
     [ContextMenu("Debug UI Raycast At Mouse")]
     private void DebugUIRaycast()
     {
-        var eventSystem = UnityEngine.EventSystems.EventSystem.current;
+        EventSystem eventSystem = EventSystem.current;
 
-        if (eventSystem == null ||
-            UnityEngine.InputSystem.Mouse.current == null)
+        if (eventSystem == null || Mouse.current == null)
         {
-            Debug.LogWarning("[NEXELYTH SAO] EventSystem or Mouse missing");
+            Debug.LogWarning(
+                "[NEXELYTH SAO] EventSystem or Mouse missing.",
+                this
+            );
             return;
         }
 
-        var eventData = new UnityEngine.EventSystems.PointerEventData(eventSystem);
-        eventData.position = UnityEngine.InputSystem.Mouse.current.position.ReadValue();
+        var eventData = new PointerEventData(eventSystem);
 
-        var results = new System.Collections.Generic.List<
-            UnityEngine.EventSystems.RaycastResult>();
+        eventData.position =
+            Mouse.current.position.ReadValue();
+
+        var results = new List<RaycastResult>();
 
         eventSystem.RaycastAll(eventData, results);
 
-        Debug.Log($"[NEXELYTH SAO] Raycast hits: {results.Count}");
+        Debug.Log(
+            $"[NEXELYTH SAO] Raycast hits: {results.Count}",
+            this
+        );
 
         foreach (var hit in results)
         {
-            Debug.Log($"[NEXELYTH SAO] Hit: {hit.gameObject.name}");
+            Debug.Log(
+                $"[NEXELYTH SAO] Hit: {hit.gameObject.name}",
+                this
+            );
         }
     }
 
+
+    private void MoveSelectedIconToTop(GameObject selectedFlyout)
+    {
+        RectTransform selectedButton = null;
+
+        if (selectedFlyout == categoryFlyout)
+            selectedButton = characterButton;
+        else if (selectedFlyout == socialFlyout)
+            selectedButton = socialButton;
+
+        if (selectedButton == null)
+            return;
+
+        selectedButton.SetAsFirstSibling();
+
+        Debug.Log(
+            $"[NEXELYTH SAO] Moved to top: {selectedButton.name}",
+            this
+        );
+    }
 
 }
