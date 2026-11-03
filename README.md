@@ -37,7 +37,25 @@ The interface demonstrates the integration of a World Space Canvas with the XR p
 
 ### World Travel Service (`IWorldTravelService`)
 
-Decouples gameplay features from Unity scene management, allowing teleportation systems to request world transitions through a shared service interface.
+A shared travel abstraction decouples Portal and Memo
+gameplay features from Unity scene-management implementation.
+The interface exposes two `TravelTo` overloads: one for
+ScriptableObject-defined destinations and another for
+runtime world locations.
+
+Both callers resolve the registered service through
+`NexelythWorldTravel.Service`. The concrete
+`NexelythWorldSceneManager` implements the interface,
+moves the existing XR Origin within the current scene
+or uses additive loading for cross-world travel, and
+updates the centralised player location state.
+
+**Source Code**
+- [`IWorldTravelService.cs`](./Assets/NEXELYTH/Scripts/Core/World/IWorldTravelService.cs) — travel contract for fixed and runtime destinations.
+- [`NexelythWorldTravel.cs`](./Assets/NEXELYTH/Scripts/Core/World/NexelythWorldTravel.cs) — service registration and shared access point.
+- [`NexelythWorldSceneManager.cs`](./Assets/NEXELYTH/Scripts/Core/World/NexelythWorldSceneManager.cs) — travel implementation and scene transitions.
+- [`NexelythPortal.cs`](./Assets/NEXELYTH/Scripts/World/Portals/NexelythPortal.cs) — portal trigger consuming the interface.
+- [`NexelythMemoLocationService.cs`](./Assets/NEXELYTH/Scripts/Gameplay/Memo/NexelythMemoLocationService.cs) — saved-position travel consuming the same interface.
 
 ### Player Location Service (`NexelythPlayerLocationService`)
 
